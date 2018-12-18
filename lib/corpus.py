@@ -3,8 +3,8 @@ import csv
 import gzip
 import _pickle
 import collections
-from kwsearch import findall
-from porterstemmer import PorterStemmer
+from . import kwsearch
+from . import porterstemmer
 
 
 class Corpus:
@@ -14,7 +14,7 @@ class Corpus:
     stem_text = []
 
     def __init__(self, file_cache=''):
-        self.ps = PorterStemmer()
+        self.ps = porterstemmer.PorterStemmer()
         if file_cache:
             with open(file_cache, 'rb') as fh:
                 state = _pickle.load(fh)
@@ -53,9 +53,9 @@ class Corpus:
         ]
         # Find from corpus
         if use_stemming:
-            match_list = findall(kw, self.stem_text)
+            match_list = kwsearch.findall(kw, self.stem_text)
         else:
-            match_list = findall(kw, self.text)
+            match_list = kwsearch.findall(kw, self.text)
         # Create groups
         mdict = collections.defaultdict(list)
         for i, j in match_list:

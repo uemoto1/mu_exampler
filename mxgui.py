@@ -4,7 +4,7 @@
 import tkinter as tk
 import tkinter.scrolledtext as tkst
 
-import corpus
+from lib import corpus
 
 
 
