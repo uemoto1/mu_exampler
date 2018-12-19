@@ -5,25 +5,7 @@ import sys
 import csv
 import tempfile
 
-def clean_tex(text):
-    # Removing outside of document section:
-    tag_doc1 = r"\begin{document}"
-    tag_doc2 = r"\end{document}"
-    pos_doc1 = text.find(tag_doc1)
-    if 0 <= pos_doc1:
-        pos_doc2 = text.find(tag_doc2) + len(tag_doc2)
-        text = text[pos_doc1:pos_doc2]
-        print("Cut doc")
-    
-    # Removing thebibliography section
-    tag_bib1 = r"\begin{thebibliography}"
-    tag_bib2 = r"\end{thebibliography}"
-    pos_bib1 = text.find(tag_bib1)
-    if 0 <= pos_bib1:
-        pos_bib2 = text.find(tag_bib2) + len(tag_bib2)
-        text = text[:pos_bib1] + text[pos_bib2:]
-        print("Cut bib")
-    return text
+
 
 def tex2csv(file_tex, file_csv, ncolumn=24):
 
