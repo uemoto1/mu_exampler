@@ -3,17 +3,20 @@
 
 import tkinter as tk
 import tkinter.scrolledtext as tkst
+import optparse
 
+import os
+import sys
 from lib import corpus
 
+mydir = os.path.dirname(__file__)
 
 
 class App:
     
-    DEFAULT_KEYWORD = '* discuss * * section'
 
 
-    def __init__(self):
+    def __init__(self, default_keyword=''):
 
         self.corpus = corpus.Corpus(".cache")
 
@@ -29,7 +32,7 @@ class App:
         self.pw.pack(expand=True, fill=tk.BOTH)
 
         self.txt_keyword = tk.Entry(self.top)
-        self.txt_keyword.insert(0, self.DEFAULT_KEYWORD)
+        self.txt_keyword.insert(0, default_keyword)
         self.chk_stemming = tk.Checkbutton(self.top, text='Stemming')
         self.btn_search = tk.Button(self.top, text="Search")
 
@@ -82,4 +85,28 @@ class App:
                 self.txt_result.insert(tk.END,  ' ' + ' '.join(tail) + '\n')
 
 
-app = App()
+
+def rebuild_database(directory):
+    print("Rebuilding cache...")
+    c = corpus.Corpus()
+    for item in os.listdir(directory):
+        if item.endswith('.csv') or item.endswith('.csv.gz'):
+            print("Loading %s" % item)
+            c.migrate(os.path.join(directory, item))
+    c.dump_cache(".cache")
+    
+
+if __name__ == '__main__':
+        parser = optparse.OptionParser()
+        parser.add_option("-d", "--directory", dest="directory", 
+            type=str, default=mydir, help="csv directory")            
+        parser.add_option("-r", "--rebuild", dest="rebuild", 
+            action="store_true", default=False,  help="rebuild database")            
+        opts, args = parser.parse_args()
+        
+        if opts.rebuild:
+            rebuild_database(opts.directory)
+            sys.exit(0)
+
+        
+        app = App('* discuss * * section')
