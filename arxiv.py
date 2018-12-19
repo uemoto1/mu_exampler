@@ -17,7 +17,10 @@ def read_tex(filelist_tex):
         with open(file_tex, 'rb') as fh:
             buff = [chr(x) for x in fh.read() if chr(x) in string.printable]
         text = ''.join(buff)
-    # Removing begin and end document
+        
+        text=text.replace(r"\beq", r"\begin{equation}")
+        #text.replace(r"\end\n", r"\begin{equation}")
+
         tag1 = r"\begin{document}"
         tag2 = r"\end{document}"
         pos1 = text.find(tag1) + len(tag1)
@@ -26,7 +29,7 @@ def read_tex(filelist_tex):
         pos2 = text.find(tag2)
         if 0 <= pos2:
             text = text[:pos2]
-        # Removing thebibliography section
+        
         tag1 = r'\begin{thebibliography}'
         tag2 = r'\end{thebibliography}'
         pos1 = text.find(tag1)
@@ -34,7 +37,7 @@ def read_tex(filelist_tex):
             pos2 = text.find(tag2) + len(tag2)
             text = text[:pos1] + text[pos2:]
         fulltext += text
-    print(fulltext)
+#    print(fulltext)
     return fulltext
     
 
@@ -70,6 +73,9 @@ if __name__ == '__main__':
             filelist_tex.sort()
             
             tex = read_tex(filelist_tex)
+            
+        with open("log.tex", "w") as fh:
+            fh.write(tex)
 
         with tempfile.NamedTemporaryFile(suffix='.tex') as fh_tmp:
             fh_tmp.write(tex.encode('utf-8'))
