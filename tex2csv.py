@@ -9,11 +9,7 @@ import tempfile
 
 def tex2csv(file_tex, file_csv, ncolumn=24):
 
-    with tempfile.NamedTemporaryFile(suffix='.tex') as fh_tmp:
-        with open(file_tex) as fh_tex:
-            fh_tmp.write(clean_tex(fh_tex.read()).encode('utf-8'))
-        fh_tmp.flush()
-        code = subprocess.check_output(["pandoc", "-i", fh_tmp.name, "--to", "plain"])
+    code = subprocess.check_output(["pandoc", "-i", file_tex, "--to", "plain"])
     text = code.decode('utf-8')
 
     buff = []

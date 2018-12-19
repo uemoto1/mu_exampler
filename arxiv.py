@@ -12,19 +12,30 @@ ptn_number = re.compile(r'(\w+/)?([\d\.v]+)')
 
 def read_tex(filelist_tex):
     # Generate ascii text
-    buff = []
+    fulltext = ""
     for file_tex in filelist_tex:
         with open(file_tex, 'rb') as fh:
-            buff += [chr(x) for x in fh.read() if chr(x) in string.printable]
-    text = ''.join(buff)
-    # Removing thebibliography section
-    tag1 = r'\begin{thebibliography}'
-    tag2 = r'\end{thebibliography}'
-    pos1 = text.find(tag1)
-    if 0 <= pos1:
-        pos2 = text.find(tag2) + len(tag2)
-        text = text[:pos1] + text[pos2:]
-    return text
+            buff = [chr(x) for x in fh.read() if chr(x) in string.printable]
+        text = ''.join(buff)
+    # Removing begin and end document
+        tag1 = r"\begin{document}"
+        tag2 = r"\end{document}"
+        pos1 = text.find(tag1) + len(tag1)
+        if 0 <= pos1:
+            text = text[pos1:]
+        pos2 = text.find(tag2)
+        if 0 <= pos2:
+            text = text[:pos2]
+        # Removing thebibliography section
+        tag1 = r'\begin{thebibliography}'
+        tag2 = r'\end{thebibliography}'
+        pos1 = text.find(tag1)
+        if 0 <= pos1:
+            pos2 = text.find(tag2) + len(tag2)
+            text = text[:pos1] + text[pos2:]
+        fulltext += text
+    print(fulltext)
+    return fulltext
     
 
 
