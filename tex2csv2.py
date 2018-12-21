@@ -8,32 +8,38 @@ import chardet
 
 ptn_input = re.compile(r'\\input\{\s*(\S+)\s*\}')
 
-def read_tex(file_tex):
-    
-    basedir = os.path.dirname(file_tex)
-    
-    def _is_upper_level(file_item):
-        rel = os.path.relpath(file_item, basedir)
-        return rel.startswith(os.pardir)
-        
-    def _expand_input(m):
-        title_tex = '%s.tex' % os.path.splitext(m.group(1))[0]
-        file_tex_child = os.path.join(basedir, title_tex)
-        if not _is_upper_level(file_tex_child):
-            return read_tex(file_tex_child)
-    
-    sys.stderr.write('# Reading %s ...\n' % file_tex)
-    
-    with open(file_tex, 'rb') as fh_tex:
-        buff = fh_tex.read()
-    charset = chardet.detect(buff)['encoding']
-    
-    sys.stderr.write('# Decoding charset from %s ...\n' % charset)
-    text = buff.decode(charset)
-    text = ptn_input.sub(_expand_input, text)
-    
-    return text
 
+def extract_texdir(texdir):
+    cache = {}
+    for dirname, dirlist, filelist in os.walk(texdir):
+        for title in filelist:
+            if os.path.splitext(title)[1] == '.tex':
+                file_tex = os.path.abspath(os.path.join(dirname, title))
+                with open(file_tex, 'rb') as fh_tex:
+                    buff = fh_tex.read()
+                charset = chardet.detect(buff)
+                cache[file_tex] = buff.decode(charset['encoding'])
+    
+    def _expand_inp(m, file_tex):
+        title = '%s.tex' % os.path.splitext(m.group(1))[0]
+        dirname = os.path.dirname(file_tex)
+        file_tex_child = os.path.abspath(os.path.join(dirname, title))
+        return _read_tex(file_tex_child)
+        
+    def _read_tex(file_tex):
+        tmp = cache[file_tex]
+        tmp = ptn_input.sub(lambda m: _expand_inp(m, file_tex), tmp)
+        return tmp
+    
+    count = [(v.count(r"\input"), k) for k, v in cache.items()]
+    count.sort(reverse=True)
+    
+    _, file_main_tex = count[0]
+    
+    tmp = _read_tex(file_main_tex)
+    
+    return tmp
+    
 
 
 def main():
@@ -45,18 +51,7 @@ def main():
     opts, args = parser.parse_args()
 
 
-dat = read_tex("test/wannier-2col.tex")
-
-# rule_list = [
-#     [r'\beq', r'\begin{equation}'],
-#     [r'\eeq', r'\end{equation}'],
-#     [r'\newcommand', r'%%']
-#     [r'\def', r'%%']
-# ]
-rule_list = []
-
-for x, y in rule_list:
-    dat = dat.replace(x, y)
+dat = extract_texdir("test")
 
 with open("out.tex", 'wt') as fh:
     fh.write(dat)
