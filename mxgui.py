@@ -70,6 +70,7 @@ class App:
                 self.lb_pattern.insert(tk.END, 
                     "%s [%d found]" % (" ".join(item[0][0]), len(item))
                 )
+                print(" ".join(item[0][0]))
             
             self.lab_status.config(
                 text='%d patterns (total %d snippets) are found' % (len(self.result), self.number)
